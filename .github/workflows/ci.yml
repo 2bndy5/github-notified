@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: Code Formatting & Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Setup Nushell
+        uses: hustcer/setup-nu@v3
+        with:
+          version: "*"
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install nur taskrunner
+        run: cargo install nur || true
+
+      - name: Run Lint Task (nur lint)
+        run: nur lint || cargo clippy --all-targets -- -D warnings
+
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Nushell
+        uses: hustcer/setup-nu@v3
+        with:
+          version: "*"
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install nur taskrunner
+        run: cargo install nur || true
+
+      - name: Run Test Task (nur test)
+        run: nur test || cargo test --all-targets --verbose
+
+  build:
+    name: Build Browser Extensions (Chromium & Firefox)
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain with wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Setup Nushell
+        uses: hustcer/setup-nu@v3
+        with:
+          version: "*"
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install wasm-bindgen-cli & nur
+        run: |
+          cargo install wasm-bindgen-cli --version 0.2.108 || true
+          cargo install nur || true
+
+      - name: Package Extensions (nur package)
+        run: nur package --release || nu scripts/package.nu --release
+
+      - name: Upload Chromium Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-notified-chromium
+          path: dist/chromium/
+
+      - name: Upload Firefox Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-notified-firefox
+          path: dist/firefox/
+
+      - name: Upload Packaged Zips
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-notified-packages
+          path: dist/*.zip

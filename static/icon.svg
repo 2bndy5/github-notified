@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#24292f"/>
+      <stop offset="100%" stop-color="#0969da"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#bg)"/>
+  <!-- Bell / Notification Symbol -->
+  <path d="M64 26 C47.4 26 34 39.4 34 56 L34 74 L26 82 L26 88 L102 88 L102 82 L94 74 L94 56 C94 39.4 80.6 26 64 26 Z" fill="#ffffff"/>
+  <circle cx="64" cy="98" r="8" fill="#ffffff"/>
+  <!-- Notification Dot -->
+  <circle cx="92" cy="36" r="14" fill="#2da44e" stroke="#ffffff" stroke-width="4"/>
+</svg>
