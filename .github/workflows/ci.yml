@@ -16,50 +16,60 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
+        run: rustup update --no-self-update
 
-      - name: Setup Nushell
-        uses: hustcer/setup-nu@v3
-        with:
-          version: "*"
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          key: cargo-lint-${{ hashfiles('Cargo.lock') }}
+          path: |-
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
 
       - name: Install nur taskrunner
-        run: cargo install nur || true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: cargo binstall nur
 
-      - name: Run Lint Task (nur lint)
-        run: nur lint || cargo clippy --all-targets -- -D warnings
+      - run: nur lint
 
   test:
     name: Unit & Integration Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        run: rustup update --no-self-update
 
-      - name: Setup Nushell
-        uses: hustcer/setup-nu@v3
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
-          version: "*"
+          key: cargo-test-${{ hashfiles('Cargo.lock') }}
+          path: |-
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
 
       - name: Install nur taskrunner
-        run: cargo install nur || true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: cargo binstall nur
 
-      - name: Run Test Task (nur test)
-        run: nur test || cargo test --all-targets --verbose
+      - run: nur test
 
   build:
     name: Build Browser Extensions (Chromium & Firefox)
@@ -67,43 +77,71 @@ jobs:
     needs: [lint, test]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Rust toolchain with wasm32 target
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
+        run: |-
+          rustup update --no-self-update
+          rustup target add wasm32-unknown-unknown
 
       - name: Setup Nushell
-        uses: hustcer/setup-nu@v3
+        uses: hustcer/setup-nu@9215c80adb545a85c419d5085b76eb6d082f49e7 # v3.27
         with:
-          version: "*"
+          version: "0.115.1"
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
+      - name: find wasm-bindgen version
+        id: wasm-bindgen-ver
+        shell: nu {0}
+        run:  |-
+          let ver = (
+            cargo tree
+            | lines
+            | where { $in | str contains " wasm-bindgen " }
+            | first
+            | parse "{_} wasm-bindgen v{version}"
+            | first
+            | get version
+          )
+          $"version=($ver)\n" | save --append $env:GITHUB_OUTPUT
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
 
       - name: Install wasm-bindgen-cli & nur
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          WASM_BINDGEN_VERSION: ${{ steps.wasm-bindgen-ver.outputs.version }}
         run: |
-          cargo install wasm-bindgen-cli --version 0.2.108 || true
-          cargo install nur || true
+          cargo binstall wasm-bindgen-cli --version $env:WASM_BINDGEN_VERSION
+          cargo binstall nur
 
-      - name: Package Extensions (nur package)
-        run: nur package --release || nu scripts/package.nu --release
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          key: build-${{ hashfiles('Cargo.lock') }}
+          path: |-
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+
+      - run: nur package --release
 
       - name: Upload Chromium Extension Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: github-notified-chromium
           path: dist/chromium/
 
       - name: Upload Firefox Extension Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: github-notified-firefox
           path: dist/firefox/
 
       - name: Upload Packaged Zips
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: github-notified-packages
           path: dist/*.zip
