@@ -104,7 +104,7 @@ jobs:
             | first
             | get version
           )
-          $"version=($ver)\n" | save --append $env:GITHUB_OUTPUT
+          $"version=($ver)\n" | save --append $env.GITHUB_OUTPUT
 
       - name: Install cargo-binstall
         uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
