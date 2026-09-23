@@ -91,6 +91,15 @@ jobs:
         with:
           version: "0.115.1"
 
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        with:
+          key: build-${{ hashfiles('Cargo.lock') }}
+          path: |-
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+
       - name: find wasm-bindgen version
         id: wasm-bindgen-ver
         shell: nu {0}
@@ -110,21 +119,13 @@ jobs:
         uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
 
       - name: Install wasm-bindgen-cli & nur
+        shell: nu {0}
         env:
           GITHUB_TOKEN: ${{ github.token }}
           WASM_BINDGEN_VERSION: ${{ steps.wasm-bindgen-ver.outputs.version }}
         run: |
           cargo binstall wasm-bindgen-cli --version $env.WASM_BINDGEN_VERSION
           cargo binstall nur
-
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        with:
-          key: build-${{ hashfiles('Cargo.lock') }}
-          path: |-
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
 
       - run: nur package --release
 
