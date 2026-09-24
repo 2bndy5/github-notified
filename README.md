@@ -29,7 +29,7 @@ To use GitHub Notified, create a classic personal access token on GitHub:
 5. Click **Generate token** and copy your `ghp_...` token.
 6. Open the extension's **Options** page and paste your token into the field. Click **Test Connection** to verify.
 
-> [!Note}
+> [!note]
 > The GitHub REST API `/notifications` endpoint does **not** support fine-grained PATs. You must use a classic PAT (`ghp_...`).
 
 
