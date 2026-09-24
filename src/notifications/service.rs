@@ -17,7 +17,7 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
     if !config.has_token() {
         action::set_badge_text("!");
         action::set_badge_color("#cf222e");
-        action::set_title("GitHub Notified: Please set your Personal Access Token in Options.");
+        action::set_title("Please set your Personal Access Token in Options.");
         return Err("No token configured".to_string());
     }
 
@@ -63,7 +63,7 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
         // 4. Update Toolbar Badge
         if count == 0 {
             action::clear_badge();
-            action::set_title("GitHub Notified: No unread notifications");
+            action::set_title("No unread notifications");
         } else {
             let count_display = if count > 99 {
                 "99+".to_string()
@@ -72,7 +72,7 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
             };
             action::set_badge_text(&count_display);
             action::set_badge_color("#0969da"); // GitHub accent blue
-            action::set_title(&format!("GitHub Notified: {count} unread notifications"));
+            action::set_title(&format!("{count} unread notifications"));
         }
 
         // 5. Desktop Notifications for new items
