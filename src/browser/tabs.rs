@@ -16,13 +16,6 @@ struct CreateTabProps<'a> {
 
 #[cfg(target_arch = "wasm32")]
 #[allow(dead_code)]
-#[derive(Serialize)]
-struct UpdateTabProps {
-    active: bool,
-}
-
-#[cfg(target_arch = "wasm32")]
-#[allow(dead_code)]
 #[derive(Deserialize)]
 struct Tab {
     id: Option<i32>,
@@ -30,22 +23,14 @@ struct Tab {
     url: Option<String>,
 }
 
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["chrome", "tabs"], js_name = update)]
-    fn chrome_tabs_update(tab_id: i32, update_properties: &JsValue) -> js_sys::Promise;
-}
-
 /// Open a URL, optionally reusing an existing tab matching the URL pattern
 pub async fn open_or_focus_tab(target_url: &str, reuse_existing: bool) {
     #[cfg(target_arch = "wasm32")]
     {
+        use wasm_bindgen::JsValue;
+        use wasm_bindgen_futures::JsFuture;
+
         if reuse_existing {
-            // Strip queries/hashes for pattern matching
             let pattern = if target_url.contains("github.com/notifications") {
                 "*://github.com/notifications*"
             } else {
@@ -53,17 +38,25 @@ pub async fn open_or_focus_tab(target_url: &str, reuse_existing: bool) {
             };
 
             let query = QueryInfo { url: pattern };
-            if let Ok(tabs) = oxichrome::tabs::query::<_, Tab>(&query).await {
-                if let Some(tab) = tabs.first() {
-                    if let Some(tab_id) = tab.id {
-                        let obj = js_sys::Object::new();
-                        let _ = js_sys::Reflect::set(
-                            &obj,
-                            &JsValue::from_str("active"),
-                            &JsValue::from_bool(true),
-                        );
-                        let _ = chrome_tabs_update(tab_id, &obj.into());
-                        return;
+            if let Ok(js_query) = serde_wasm_bindgen::to_value(&query) {
+                let promise = crate::js_bridge::chrome_tabs_query(&js_query);
+                if let Ok(result) = JsFuture::from(promise).await {
+                    if let Ok(tabs) = serde_wasm_bindgen::from_value::<Vec<Tab>>(result) {
+                        if let Some(tab) = tabs.first() {
+                            if let Some(tab_id) = tab.id {
+                                let obj = js_sys::Object::new();
+                                let _ = js_sys::Reflect::set(
+                                    &obj,
+                                    &JsValue::from_str("active"),
+                                    &JsValue::from_bool(true),
+                                );
+                                let _ = JsFuture::from(
+                                    crate::js_bridge::chrome_tabs_update(tab_id, &obj.into()),
+                                )
+                                .await;
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -73,7 +66,10 @@ pub async fn open_or_focus_tab(target_url: &str, reuse_existing: bool) {
             url: target_url,
             active: true,
         };
-        let _ = oxichrome::tabs::create::<_, Tab>(&props).await;
+        if let Ok(js_props) = serde_wasm_bindgen::to_value(&props) {
+            let promise = crate::js_bridge::chrome_tabs_create(&js_props);
+            let _ = JsFuture::from(promise).await;
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
