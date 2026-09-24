@@ -50,9 +50,10 @@ pub async fn open_or_focus_tab(target_url: &str, reuse_existing: bool) {
                                     &JsValue::from_str("active"),
                                     &JsValue::from_bool(true),
                                 );
-                                let _ = JsFuture::from(
-                                    crate::js_bridge::chrome_tabs_update(tab_id, &obj.into()),
-                                )
+                                let _ = JsFuture::from(crate::js_bridge::chrome_tabs_update(
+                                    tab_id,
+                                    &obj.into(),
+                                ))
                                 .await;
                                 return;
                             }

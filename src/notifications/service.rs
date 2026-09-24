@@ -44,9 +44,7 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
         {
             Ok(t) => t,
             Err(err) => {
-                web_sys::console::log_1(
-                    &format!("[github-notified] Polling error: {err}").into(),
-                );
+                web_sys::console::log_1(&format!("[github-notified] Polling error: {err}").into());
                 action::set_badge_text("!");
                 action::set_badge_color("#cf222e");
                 action::set_title(&format!("GitHub Notified Error: {err}"));

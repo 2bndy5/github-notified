@@ -29,6 +29,27 @@ pub async fn __bg_start() {
         }
     });
 
+    // Toolbar icon click (no popup) opens/focuses the notifications tab
+    browser::on_clicked(|| {
+        wasm_bindgen_futures::spawn_local(async {
+            let cfg = Config::load().await;
+            browser::open_or_focus_tab(&cfg.notifications_url(), cfg.reuse_existing_tab).await;
+        });
+    });
+
+    // Re-apply settings immediately (reschedule alarm + re-poll) when saved from the Options page,
+    // so changes take effect without needing to reload the extension
+    storage::on_changed(|changes, area| {
+        if area == "local" && storage::changes_contains_key(&changes, config::STORAGE_KEY_SETTINGS)
+        {
+            wasm_bindgen_futures::spawn_local(async {
+                let cfg = Config::load().await;
+                browser::schedule_poll(cfg.poll_interval_mins as f64);
+                let _ = poll_and_update(&cfg).await;
+            });
+        }
+    });
+
     // Register notification click handler (opens the clicked thread URL)
     browser::on_notification_clicked(|target_url| {
         web_sys::console::log_1(
