@@ -3,7 +3,7 @@ name = "github-notified"
 version = "0.1.0"
 edition = "2021"
 authors = ["github-notified contributors"]
-description = "Browser extension for GitHub notifications ported to Rust using oxichrome"
+description = "Browser extension for GitHub notifications"
 license = "MIT"
 
 [lib]

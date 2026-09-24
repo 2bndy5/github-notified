@@ -12,7 +12,7 @@ use notifications::service::poll_and_update;
 #[oxichrome::extension(
     name = "GitHub Notified",
     version = "0.1.0",
-    description = "Checks GitHub notifications with fine-grained PAT, badge count, and desktop alerts",
+    description = "Checks GitHub notifications with classic PAT, badge count, and desktop alerts",
     permissions = ["storage", "alarms", "notifications", "tabs"]
 )]
 pub struct GitHubNotifiedExtension;

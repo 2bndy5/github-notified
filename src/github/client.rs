@@ -18,7 +18,7 @@ impl GitHubClient {
         }
     }
 
-    /// Generates standard headers required by GitHub REST API for fine-grained PATs
+    /// Generates standard headers required by GitHub REST API
     pub fn auth_header_value(&self) -> String {
         format!("Bearer {}", self.token.trim())
     }
@@ -87,7 +87,7 @@ impl GitHubClient {
     }
 
     /// Validate the token by querying /notifications?per_page=1
-    /// (Safe for fine-grained PATs with only 'Notifications: Read-only' scope)
+    /// (Requires a classic PAT with the `notifications` scope)
     #[cfg(target_arch = "wasm32")]
     pub async fn validate_token(&self) -> Result<String, String> {
         if self.token.trim().is_empty() {
@@ -156,14 +156,15 @@ mod tests {
 
     #[test]
     fn test_auth_header_bearer() {
-        let client = GitHubClient::new("github_pat_11XYZ_testSecretKey", "https://api.github.com");
+        let client =
+            GitHubClient::new("ghp_classicToken11XYZ_testSecret", "https://api.github.com");
         assert_eq!(
             client.auth_header_value(),
-            "Bearer github_pat_11XYZ_testSecretKey"
+            "Bearer ghp_classicToken11XYZ_testSecret"
         );
 
-        let classic_client = GitHubClient::new(" ghp_classic123 ", "https://api.github.com");
-        assert_eq!(classic_client.auth_header_value(), "Bearer ghp_classic123");
+        let padded_client = GitHubClient::new(" ghp_classic123 ", "https://api.github.com");
+        assert_eq!(padded_client.auth_header_value(), "Bearer ghp_classic123");
     }
 
     #[test]

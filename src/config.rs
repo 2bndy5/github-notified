@@ -16,7 +16,7 @@ pub enum RepoFilterMode {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Config {
-    /// GitHub Personal Access Token (Fine-grained or Classic)
+    /// GitHub Personal Access Token (Classic/legacy, `ghp_...`)
     pub token: String,
     /// GitHub API URL (supports GitHub Enterprise)
     pub api_url: String,
@@ -71,11 +71,6 @@ impl Config {
         !self.token.trim().is_empty()
     }
 
-    /// Check if the token looks like a modern GitHub fine-grained PAT
-    pub fn is_fine_grained_token(&self) -> bool {
-        self.token.trim().starts_with("github_pat_")
-    }
-
     /// Load config from browser local storage (or default on error/missing)
     #[cfg(target_arch = "wasm32")]
     pub async fn load() -> Self {
@@ -121,23 +116,6 @@ mod tests {
             config.notifications_url(),
             "https://github.com/notifications"
         );
-    }
-
-    #[test]
-    fn test_token_type_detection() {
-        let config = Config {
-            token: "github_pat_11AAAAAA_BBBBBBBBBBBB".to_string(),
-            ..Default::default()
-        };
-        assert!(config.has_token());
-        assert!(config.is_fine_grained_token());
-
-        let classic_config = Config {
-            token: "ghp_classicToken123456789".to_string(),
-            ..Default::default()
-        };
-        assert!(classic_config.has_token());
-        assert!(!classic_config.is_fine_grained_token());
     }
 
     #[test]

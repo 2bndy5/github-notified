@@ -111,26 +111,26 @@ pub fn OptionsView() -> impl IntoView {
 
             // Section 1: Authentication & Token
             <div style="background: #ffffff; border: 1px solid #d0d7de; border-radius: 6px; padding: 20px; margin-bottom: 24px;">
-                <h2 style="font-size: 16px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">"GitHub Fine-Grained Personal Access Token"</h2>
+                <h2 style="font-size: 16px; font-weight: 600; margin-top: 0; margin-bottom: 12px;">"GitHub Personal Access Token (Classic)"</h2>
 
                 <div style="background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 14px; margin-bottom: 16px; font-size: 13px;">
-                    <div style="font-weight: 600; margin-bottom: 6px;">"How to create a Fine-grained PAT:"</div>
+                    <div style="font-weight: 600; margin-bottom: 6px;">"How to create a Classic PAT:"</div>
                     <ol style="margin: 0; padding-left: 20px; line-height: 1.6;">
-                        <li>"Visit " <a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color: #0969da;">"GitHub Settings → Developer Settings → Fine-grained tokens"</a></li>
-                        <li>"Click " <b>"Generate new token"</b> " and set an expiration."</li>
-                        <li>"Under " <b>"Repository access"</b> ", choose " <i>"All repositories"</i> " (or selected repositories)."</li>
-                        <li>"Under " <b>"Repository permissions"</b> ", grant " <span style="background: #ddf4ff; color: #0969da; padding: 2px 6px; border-radius: 4px; font-weight: 600;">"Notifications: Read-only"</span>"."</li>
+                        <li>"Visit " <a href="https://github.com/settings/tokens" target="_blank" style="color: #0969da;">"GitHub Settings → Developer Settings → Personal access tokens → Tokens (classic)"</a></li>
+                        <li>"Click " <b>"Generate new token (classic)"</b> " and set an expiration."</li>
+                        <li>"Under " <b>"Select scopes"</b> ", check " <span style="background: #ddf4ff; color: #0969da; padding: 2px 6px; border-radius: 4px; font-weight: 600;">"notifications"</span>"."</li>
                         <li>"Click Generate and paste your token below."</li>
                     </ol>
+                    <div style="margin-top: 10px; font-size: 12px; color: #cf222e; font-weight: 500;">"⚠ The GitHub REST API does not support fine-grained PATs for notifications. Use a classic PAT (ghp_...)."</div>
                 </div>
 
                 <label style="display: block; font-weight: 600; font-size: 13px; margin-bottom: 6px;">
-                    "Personal Access Token (github_pat_...):"
+                    "Personal Access Token (ghp_...):"
                 </label>
                 <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                     <input
                         type="password"
-                        placeholder="github_pat_..."
+                        placeholder="ghp_..."
                         prop:value=move || token.get()
                         on:input=move |ev| token.set(event_target_value(&ev))
                         style="flex: 1; padding: 7px 12px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 13px; font-family: monospace;"

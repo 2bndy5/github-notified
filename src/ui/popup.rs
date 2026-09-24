@@ -135,7 +135,7 @@ pub fn PopupView() -> impl IntoView {
                             <div style="padding: 24px; text-align: center; color: #57606a;">
                                 <p style="font-weight: 600; margin-bottom: 6px; color: #1f2328;">"Token Required"</p>
                                 <p style="font-size: 12px; margin-bottom: 16px;">
-                                    "Please provide a GitHub fine-grained Personal Access Token to view your notifications."
+                                    "Please provide a GitHub classic Personal Access Token (ghp_...) to view your notifications."
                                 </p>
                                 <button
                                     on:click=on_open_options

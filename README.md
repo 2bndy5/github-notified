@@ -22,9 +22,9 @@ Ported from [sindresorhus/notifier-for-github](https://github.com/sindresorhus/n
 ## Highlights
 
 - 🦀 **100% Rust & WebAssembly**: Zero handwritten JavaScript; built on [Oxichrome](https://github.com/0xsouravm/oxichrome).
-- 🔑 **GitHub Fine-Grained Personal Access Token (PAT)**: Authenticates securely via `Authorization: Bearer <token>` using modern GitHub REST API headers (`X-GitHub-Api-Version: 2022-11-28`).
-- 🔒 **Read-Only Scope**: Only requires `Notifications: Read-only`. All mutable actions (marking read, replying, merging) safely forward to GitHub's web interface.
-- ⚡ **Reactive UI with Leptos**: Fast popup for unread notifications and settings page for fine-grained token configuration.
+- 🔑 **GitHub Classic Personal Access Token (PAT)**: Authenticates securely via `Authorization: Bearer <token>` using modern GitHub REST API headers (`X-GitHub-Api-Version: 2022-11-28`).
+- 🔒 **Read-Only Scope**: Only requires the `notifications` scope. All mutable actions (marking read, replying, merging) safely forward to GitHub's web interface.
+- ⚡ **Reactive UI with Leptos**: Fast popup for unread notifications and settings page for token configuration.
 - 🔔 **Desktop Alerts & Toolbar Badge**: Displays live unread notification count badge and triggers system desktop notifications on new events.
 - 🏢 **GitHub Enterprise Support**: Supports custom API endpoints and web root URLs.
 - 🎯 **Repository & Participation Filtering**: Option to filter only participating items, or configure whitelist/blacklist repository filters.
@@ -33,18 +33,18 @@ Ported from [sindresorhus/notifier-for-github](https://github.com/sindresorhus/n
 
 ---
 
-## Token Setup (Fine-Grained PAT)
+## Token Setup (Classic PAT)
 
-To use GitHub Notified, create a fine-grained personal access token on GitHub:
+To use GitHub Notified, create a classic personal access token on GitHub:
 
-1. Go to **[GitHub Token Settings](https://github.com/settings/tokens?type=beta)** (Settings → Developer Settings → Personal access tokens → Fine-grained tokens).
-2. Click **Generate new token**.
-3. Under **Repository access**, select:
-   - **All repositories** (or choose the specific repositories you want notifications for).
-4. Under **Repository permissions**, configure:
-   - **Notifications**: `Read-only`
-5. Click **Generate token** and copy your `github_pat_...` token.
+1. Go to **[GitHub Token Settings (classic)](https://github.com/settings/tokens)** (Settings → Developer Settings → Personal access tokens → Tokens (classic)).
+2. Click **Generate new token (classic)**.
+3. Give the token a name and set an expiration.
+4. Under **Select scopes**, check **`notifications`**.
+5. Click **Generate token** and copy your `ghp_...` token.
 6. Open the extension's **Options** page and paste your token into the field. Click **Test Connection** to verify.
+
+> **Note:** The GitHub REST API `/notifications` endpoint does **not** support fine-grained PATs. You must use a classic PAT (`ghp_...`).
 
 ---
 
@@ -59,7 +59,7 @@ github-notified/
 │   ├── lib.rs                 # Extension entrypoint (oxichrome macros)
 │   ├── config.rs              # Configuration & storage models
 │   ├── github/
-│   │   ├── client.rs          # GitHub REST API client (Bearer auth, fine-grained PAT)
+│   │   ├── client.rs          # GitHub REST API client (Bearer auth, classic PAT)
 │   │   ├── models.rs          # API response structs
 │   │   └── urls.rs            # Web URL translation for issues, PRs, and comments
 │   ├── browser/
