@@ -1,0 +1,52 @@
+# nurfile - task runner for github-notified
+use scripts/package.nu [package_extension]
+
+# Check code formatting and run Clippy
+def "nur lint" [] {
+    print "==> Checking formatting..."
+    cargo fmt --all -- --check
+    print "==> Running Clippy..."
+    cargo clippy --all-targets -- -D warnings
+}
+
+# Run native unit and integration tests
+def "nur test" [] {
+    print "==> Running unit tests..."
+    cargo test --all-targets
+}
+
+# Format all Rust code
+def "nur fmt" [] {
+    print "==> Formatting code..."
+    cargo fmt --all
+}
+
+# Fast compile check
+def "nur check" [] {
+    cargo check
+}
+
+# Build WebAssembly library and unpackaged extension distributions
+def "nur build" [
+    --target: string = "all", # Target browser: chromium, firefox, or all
+    --release                 # Build in release mode
+] {
+    package_extension --target $target --release=$release
+}
+
+# Package extension directories and create distribution zip archives
+def "nur package" [
+    --target: string = "all", # Target browser: chromium, firefox, or all
+    --release                 # Build in release mode
+] {
+    package_extension --target $target --release=$release
+}
+
+# Clean build and distribution directories
+def "nur clean" [] {
+    print "==> Cleaning dist and target..."
+    if ("dist" | path exists) {
+        rm -rf dist
+    }
+    cargo clean
+}
