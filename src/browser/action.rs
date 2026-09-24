@@ -55,3 +55,24 @@ pub fn set_title(title: &str) {
 pub fn clear_badge() {
     set_badge_text("");
 }
+
+/// Register a listener for toolbar icon clicks (fires only when there is no popup)
+#[cfg(target_arch = "wasm32")]
+pub fn on_clicked<F>(mut callback: F)
+where
+    F: FnMut() + 'static,
+{
+    let closure = Closure::wrap(Box::new(move |_tab: JsValue| {
+        callback();
+    }) as Box<dyn FnMut(JsValue)>);
+
+    crate::js_bridge::chrome_action_on_clicked_add_listener(&closure);
+    closure.forget();
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn on_clicked<F>(_callback: F)
+where
+    F: FnMut() + 'static,
+{
+}

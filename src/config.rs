@@ -74,7 +74,7 @@ impl Config {
     /// Load config from browser local storage (or default on error/missing)
     #[cfg(target_arch = "wasm32")]
     pub async fn load() -> Self {
-        match oxichrome::storage::get::<Config>(STORAGE_KEY_SETTINGS).await {
+        match crate::storage::get::<Config>(STORAGE_KEY_SETTINGS).await {
             Ok(Some(cfg)) => cfg,
             _ => Config::default(),
         }
@@ -88,8 +88,8 @@ impl Config {
 
     /// Save config to browser local storage
     #[cfg(target_arch = "wasm32")]
-    pub async fn save(&self) -> Result<(), oxichrome::OxichromeError> {
-        oxichrome::storage::set(STORAGE_KEY_SETTINGS, self).await
+    pub async fn save(&self) -> Result<(), crate::storage::StorageError> {
+        crate::storage::set(STORAGE_KEY_SETTINGS, self).await
     }
 
     /// No-op on non-wasm targets

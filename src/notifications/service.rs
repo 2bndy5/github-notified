@@ -26,11 +26,10 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
     #[cfg(target_arch = "wasm32")]
     {
         // 1. Load previous cache to compute newly arrived notifications
-        let prev_cache =
-            oxichrome::storage::get::<NotificationsCache>(STORAGE_KEY_NOTIFICATIONS_CACHE)
-                .await
-                .unwrap_or(None)
-                .unwrap_or_default();
+        let prev_cache = crate::storage::get::<NotificationsCache>(STORAGE_KEY_NOTIFICATIONS_CACHE)
+            .await
+            .unwrap_or(None)
+            .unwrap_or_default();
 
         let prev_ids: Vec<String> = prev_cache
             .notifications
@@ -45,17 +44,17 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
         {
             Ok(t) => t,
             Err(err) => {
-                oxichrome::log!("[github-notified] Polling error: {}", err);
+                web_sys::console::log_1(&format!("[github-notified] Polling error: {err}").into());
                 action::set_badge_text("!");
                 action::set_badge_color("#cf222e");
                 action::set_title(&format!("GitHub Notified Error: {err}"));
-                let _ = oxichrome::storage::set(STORAGE_KEY_LAST_ERROR, &err).await;
+                let _ = crate::storage::set(STORAGE_KEY_LAST_ERROR, &err).await;
                 return Err(err);
             }
         };
 
         // Clear any previous error
-        let _ = oxichrome::storage::remove(STORAGE_KEY_LAST_ERROR).await;
+        let _ = crate::storage::remove(STORAGE_KEY_LAST_ERROR).await;
 
         // 3. Apply repository and participation filters
         let filtered = filter_notifications(&threads, config);
@@ -112,7 +111,7 @@ pub async fn poll_and_update(config: &Config) -> Result<usize, String> {
             notifications: summaries,
         };
 
-        let _ = oxichrome::storage::set(STORAGE_KEY_NOTIFICATIONS_CACHE, &new_cache).await;
+        let _ = crate::storage::set(STORAGE_KEY_NOTIFICATIONS_CACHE, &new_cache).await;
 
         Ok(count)
     }
