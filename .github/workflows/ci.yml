@@ -25,7 +25,7 @@ jobs:
         run: rustup update --no-self-update
 
       - name: Install cargo-binstall
-        uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
+        uses: cargo-bins/cargo-binstall@c06f6a0003f7c6165a00c89d1697731c9e8a5c72 # v1.25.2
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
@@ -62,7 +62,7 @@ jobs:
             ~/.cargo/git/db/
 
       - name: Install cargo-binstall
-        uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
+        uses: cargo-bins/cargo-binstall@c06f6a0003f7c6165a00c89d1697731c9e8a5c72 # v1.25.2
 
       - name: Install nur taskrunner
         env:
@@ -87,7 +87,7 @@ jobs:
           rustup target add wasm32-unknown-unknown
 
       - name: Setup Nushell
-        uses: hustcer/setup-nu@9215c80adb545a85c419d5085b76eb6d082f49e7 # v3.27
+        uses: hustcer/setup-nu@95cd3bfe252450ef7d35dd9a7ddecf3484341134 # v3.28
         with:
           version: "0.115.1"
 
@@ -116,7 +116,7 @@ jobs:
           $"version=($ver)\n" | save --append $env.GITHUB_OUTPUT
 
       - name: Install cargo-binstall
-        uses: cargo-bins/cargo-binstall@b874e25ea559687bec77e281e9b271aa1367b624 # v1.23.0
+        uses: cargo-bins/cargo-binstall@c06f6a0003f7c6165a00c89d1697731c9e8a5c72 # v1.25.2
 
       - name: Install wasm-bindgen-cli & nur
         shell: nu {0}
